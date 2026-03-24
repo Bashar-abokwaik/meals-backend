@@ -1,3 +1,4 @@
+// app.js
 import fs from 'node:fs/promises';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -14,6 +15,9 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+
+// Middleware: لخدمة الملفات الثابتة (الصور والـ public)
+app.use(express.static('public'));
 
 // Endpoint: إرجاع كل الوجبات
 app.get('/meals', async (req, res) => {
@@ -54,7 +58,7 @@ app.post('/orders', async (req, res) => {
     const ordersRaw = await fs.readFile(ordersFile, 'utf8').catch(() => '[]'); // لو الملف فاضي أو ما موجود
     const allOrders = JSON.parse(ordersRaw);
 
-    // أضف الأوردر الجديد مع ID
+    // أضف الأوردر الجديد مع ID فريد
     const newOrder = { ...orderData, id: Date.now().toString() };
     allOrders.push(newOrder);
 

@@ -1,4 +1,3 @@
-// app.js
 import fs from 'node:fs/promises';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -10,14 +9,14 @@ app.use(bodyParser.json());
 
 // Middleware: للسماح بالـ CORS
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // أي دومين يقدر يوصل
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST'); // يسمح بالـ GET و POST
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST'); 
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
 
-// Middleware: لخدمة الملفات الثابتة (الصور والـ public)
-app.use(express.static('public'));
+// **Middleware: لخدمة الملفات الثابتة (الصور)**
+app.use(express.static('public'));  
 
 // Endpoint: إرجاع كل الوجبات
 app.get('/meals', async (req, res) => {
@@ -33,7 +32,6 @@ app.get('/meals', async (req, res) => {
 app.post('/orders', async (req, res) => {
   const orderData = req.body.order;
 
-  // تحقق من البيانات الأساسية
   if (!orderData || !orderData.items || orderData.items.length === 0) {
     return res.status(400).json({ message: 'No items in order.' });
   }
@@ -53,26 +51,21 @@ app.post('/orders', async (req, res) => {
   }
 
   try {
-    // اقرأ الأوردرات الحالية
     const ordersFile = './data/orders.json';
-    const ordersRaw = await fs.readFile(ordersFile, 'utf8').catch(() => '[]'); // لو الملف فاضي أو ما موجود
+    const ordersRaw = await fs.readFile(ordersFile, 'utf8').catch(() => '[]');
     const allOrders = JSON.parse(ordersRaw);
 
-    // أضف الأوردر الجديد مع ID فريد
     const newOrder = { ...orderData, id: Date.now().toString() };
     allOrders.push(newOrder);
 
-    // احفظ الأوردرات في الملف
     await fs.writeFile(ordersFile, JSON.stringify(allOrders, null, 2));
-
-    // أرسل تأكيد
     res.status(201).json({ message: 'Order saved!', order: newOrder });
   } catch (error) {
     res.status(500).json({ message: 'Failed to save order.' });
   }
 });
 
-// Endpoint: لإرجاع كل الأوردرات (Dashboard)
+// Endpoint: إرجاع كل الأوردرات
 app.get('/orders', async (req, res) => {
   try {
     const ordersRaw = await fs.readFile('./data/orders.json', 'utf8').catch(() => '[]');
